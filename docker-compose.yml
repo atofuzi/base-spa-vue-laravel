@@ -15,7 +15,7 @@ services:
       dockerfile: ./docker/web/Dockerfile
     container_name: project-proxy
     ports:
-      - "8080:80"
+      - "8088:80"
     depends_on:
       - project-backend
       - project-frontend

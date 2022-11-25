@@ -58,7 +58,7 @@ Build finished at 15:42:25 by 0.000s
 
 ```
 ### フロントエンド疎通確認
-localhost:8080にアクセスし、Vueのトップ画面が表示される
+localhost:8088にアクセスし、Vueのトップ画面が表示される
 
 ## バックエンドのセットアップ
 ```
@@ -77,18 +77,18 @@ docker-compose exec project-backend  php artisan db:seed; // データ生成
 
 ### バックエンド疎通確認
 Web画面
-http://localhost:8080/phpinfo.php にアクセスしphpの設定画面が表示される
+http://localhost:8088/phpinfo.php にアクセスしphpの設定画面が表示される
 
 API
 Postmanで下記URLにGETリクエストを叩き、「test success」とレスポンスがあればOK。
-http://localhost:8080/api/test 
+http://localhost:8088/api/test 
 
 もしくは、ターミナルでcurlコマンドを叩いてもOK
-curl http://localhost:8080/api/test 
+curl http://localhost:8088/api/test 
 
 ## ログイン機能を試す
 method:post
-api：localhost:8080/oauth/token
+api：localhost:8088/oauth/token
 body: {
   grant_type: password,
   client_id: X // oauth_clientテーブル確認
