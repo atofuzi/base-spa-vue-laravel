@@ -3,12 +3,15 @@ volumes:
   # 適宜名前変更
   vue-project-node-modules:
     name: vue-project-node-modules
+  project-db-testing-volume:
+    name: project-db-testing-volume
 
 networks:
   project-network:
     name: project-network
 
 services:
+  # 適宜名前変更
   project-proxy:
     build:
       context: .
@@ -22,8 +25,6 @@ services:
     volumes:
       - ./docker/web/nginx.conf:/etc/nginx/nginx.conf
       - ./docker/web/default.conf:/etc/nginx/conf.d/default.conf
-      # - "chat-demo-socket:/var/run/php-fpm/"
-      # - ./docker/web/proxy-php.conf:/usr/local/apache2/conf/extra/proxy-php.conf
     environment:
       - TZ=Asia/Tokyo
     networks:
@@ -47,7 +48,6 @@ services:
       dockerfile: ./docker/php/Dockerfile
     container_name: project-backend
     volumes:
-      # - "chat-demo-socket:/var/run/php-fpm/"
       - ./backend:/var/www/
       - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini
@@ -80,3 +80,36 @@ services:
       MYSQL_PASSWORD: project_local
       TZ: 'Asia/Tokyo'
     command: --default-authentication-plugin=mysql_native_password
+  
+  project-db-testing:
+    image: mysql:8.0
+    networks:
+      - project-network
+    ports:
+      - 53306:3306
+    volumes:
+      - project-db-testing-volume:/var/lib/mysql
+      - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+    environment:
+      MYSQL_ROOT_PASSWORD: project_test
+      MYSQL_DATABASE: project_db_testing
+      MYSQL_USER: project_test
+      MYSQL_PASSWORD: project_test
+      TZ: 'Asia/Tokyo'
+    ## ログをターミナルに標準出力する
+    command:  >
+      bash -c '
+      touch /var/log/general.log &&
+      chown mysql:mysql /var/log/general.log &&
+      tail -f /var/log/general.log &
+      /entrypoint.sh mysqld
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --general-log=true
+      --general-log-file=/var/log/general.log
+      --default-authentication-plugin=mysql_native_password
+      '
+    logging:
+      options:
+        max-size: "10k"
+        max-file: "5"
