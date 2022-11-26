@@ -28,15 +28,29 @@ Makefileにコマンドを登録しています。
   
 makeコマンドはprojectのルートディレクトリ直下で実行してください。  
 
-## コンテナイメージの作成
+## Docker用の.envをコピー
 ```
-make build
+cp .env.example .env
 ```
 
-## コンテナ起動
+## .envの変数を適宜変更
+ご自身のプロジェクト名等に合わせて変更ください。
+
+## コンテナ作成・起動・初期設定
+下記コマンドを叩くことで、コンテナ作成・コンテナ起動・バックエンド側の設定を一度に行えます。
 ```
-make start
+make setup
 ```
+### やっていること  
+docker-compose build --no-cache //コンテナ作成  
+docker-compose up -d // コンテナ起動
+cp ./backend/.env.example ./backend/.env; // envの作成  
+docker-compose exec project-backend  composer install; // パッケージインストール  
+docker-compose exec project-backend  php artisan key:generate; // laravel アプリケーションキー生成  
+docker-compose exec project-backend  php artisan migrate; // DB作成  
+docker-compose exec project-backend  php artisan passport:install; // laravel passportを仕様するため、クライアントIDとシークレットキーを生成しoauth_clients_tableにセット  
+docker-compose exec project-backend  php artisan db:seed; // データ生成  
+
 
 ## フロントエンド起動確認  
 フロントエンドは起動時に、yarn install && yarn serveを実行しているため、コンテナが起動してからサーバが立ち上がるまで数分かかります。  
@@ -44,7 +58,7 @@ make start
   
 ### 起動状況を確認するためにログを表示
 ```bash
-make log_frontend
+make log_front
 
 // 中略
   App running at:
@@ -60,20 +74,10 @@ Build finished at 15:42:25 by 0.000s
 ### フロントエンド疎通確認
 localhost:8088にアクセスし、Vueのトップ画面が表示される  
   
-## バックエンドのセットアップ
-```
-make ini_backend
-```
   
 ※初回のみ使用するコマンド  
   
-### やっていること  
-cp ./backend/.env.example ./backend/.env; // envの作成  
-docker-compose exec project-backend  composer install; // パッケージインストール  
-docker-compose exec project-backend  php artisan key:generate; // laravel アプリケーションキー生成  
-docker-compose exec project-backend  php artisan migrate; // DB作成  
-docker-compose exec project-backend  php artisan passport:install; // laravel passportを仕様するため、クライアントIDとシークレットキーを生成しoauth_clients_tableにセット  
-docker-compose exec project-backend  php artisan db:seed; // データ生成  
+
   
 ### バックエンド疎通確認  
 Web画面  
@@ -108,27 +112,47 @@ https://readouble.com/laravel/9.x/ja/passport.html
   
   
 # 運用時に使用すると便利なコマンド
-## phpのコンテナに入る
+## コンテナ起動
 ```
-make sh
+make start
 ```
-
-## DBのmigration実行
+  
+## コンテナ停止
 ```
-make migrate
+make stop
 ```
-
-## DBのseeder実行
-```
-make dbseed
-```
-
+  
 # コンテナ再起動
 ```
 make restart
 ```
-
+  
 # コンテナ全削除
 ```
 make reset
+```
+  
+## phpのコンテナに入る
+```
+make sh
+```
+  
+## DBのmigration実行
+```
+make migrate
+```
+  
+## DBのmigrationのロールバック実行
+```
+make migrate_back
+```
+  
+## DBのseeder実行
+```
+make seed
+```
+  
+## DBのリストア（マイグレーションとシーダーを流し直す）
+```
+make db_restore
 ```
