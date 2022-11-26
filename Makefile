@@ -1,17 +1,25 @@
-# 変数
-PROXY=project-proxy
-BACKEND=project-backend 
-FRONTEND=project-frontend
-DB_NAME=project-db
-DB_TESTING_NAME=project-db-testing
-NETWORK=project-network
+include .env
+
+# 初期セットアップ
+setup:
+	make build_no_cache; \
+	make start; \
+	make ini_backend; \
+
+ini_backend:
+	cp ./backend/.env.example ./backend/.env; \
+	docker-compose exec $(BACKEND_CONTAINER_NAME) composer install; \
+	docker-compose exec $(BACKEND_CONTAINER_NAME) php artisan key:generate; \
+	docker-compose exec $(BACKEND_CONTAINER_NAME) php artisan migrate:fresh; \
+	docker-compose exec $(BACKEND_CONTAINER_NAME) php artisan passport:install; \
+	docker-compose exec $(BACKEND_CONTAINER_NAME) php artisan db:seed;
 
 # コンテナ操作全般
 build:
 	docker-compose build
 
 build_no_cache:
-	docekr-compose build --no-cache
+	docker-compose build --no-cache
 
 start:
 	docker-compose up -d
@@ -30,47 +38,47 @@ reset:
 	docker-compose down
 
 # バックエンドコンテナ用コマンド
-ini_backend:
-	cp ./backend/.env.example ./backend/.env; \
-	docker-compose exec $(BACKEND) composer install; \
-	docker-compose exec $(BACKEND) php artisan key:generate; \
-	docker-compose exec $(BACKEND) php artisan migrate; \
-	docker-compose exec $(BACKEND) php artisan passport:install; \
-	docker-compose exec $(BACKEND) php artisan db:seed;
 
 sh:
-	docker-compose exec $(BACKEND) /bin/sh
+	docker-compose exec $(BACKEND_CONTAINER_NAME) /bin/sh
 
 migrate:
-	docker-compose exec $(BACKEND) php artisan migrate
+	docker-compose exec $(BACKEND_CONTAINER_NAME) php artisan migrate
 
-dbseed:
-	docker-compose exec $(BACKEND) php artisan db:seed
+migrate_back:
+	docker-compose exec $(BACKEND_CONTAINER_NAME) php artisan migrate:rollback
 
+seed:
+	docker-compose exec $(BACKEND_CONTAINER_NAME) php artisan db:seed
+
+db_restore:
+	docker-compose exec $(BACKEND_CONTAINER_NAME) php artisan migrate:fresh; \
+	docker-compose exec $(BACKEND_CONTAINER_NAME) php artisan db:seed;
+	
 log:
-	docker-compose logs -f ${BACKEND}
+	docker-compose logs -f ${BACKEND_CONTAINER_NAME}
 
 # フロントエンドコンテナ用コマンド
 sh_front:
-	docker-compose exec $(FRONTEND) /bin/sh
+	docker-compose exec $(FRONTEND_CONTAINER_NAME) /bin/sh
 
 log_front:
-	docker-compose logs -f ${FRONTEND}
+	docker-compose logs -f ${FRONTEND_CONTAINER_NAME}
 
 # リバースプロキシコンテナ用コマンド
 
 log_web:
-	docker-compose logs -f ${PROXY}
+	docker-compose logs -f ${PROXY_CONTAINER_NAME}
 
 # DBコンテナ用コマンド
 sh_db:
-	docker-compose exec $(DB_NAME) /bin/sh
+	docker-compose exec $(DB_CONTAINER_NAME) /bin/sh
 
 sh_db_test:
-	docker-compose exec $(DB_TESTING_NAME) /bin/sh
+	docker-compose exec $(DB_TESTING_CONTAINER_NAME) /bin/sh
 
 log_db:
-	docker-compose logs -f ${DB_NAME}
+	docker-compose logs -f ${DB_CONTAINER_NAME}
 
 log_db_test:
-	docker-compose logs -f ${DB_TESTING_NAME}
+	docker-compose logs -f ${DB_TESTING_CONTAINER_NAME}
