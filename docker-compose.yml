@@ -16,7 +16,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/web/Dockerfile
-    container_name: project-proxy
     ports:
       - "8088:80"
     depends_on:
@@ -34,7 +33,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/vue/Dockerfile
-    container_name: project-frontend
     networks:
       - project-network
     volumes:
@@ -46,7 +44,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/php/Dockerfile
-    container_name: project-backend
     volumes:
       - ./backend:/var/www/
       - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
@@ -65,7 +62,6 @@ services:
 
   project-db:
     image: mysql:8.0
-    container_name: project-db
     networks:
       - project-network
     ports:
