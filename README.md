@@ -130,7 +130,28 @@ XXXXXXはoauth_clientテーブルをご確認ください
 Laravel Passport「パスワードグラントのトークン」  
 https://readouble.com/laravel/9.x/ja/passport.html  
   
-  
+# ライブラリの追加作業
+## Backend
+backendのコンテナに入る  
+```bash
+make sh
+```
+
+コンテナ内でパッケージをインストールする
+```bin/sh
+composer install パッケージ名
+```
+## Frontend
+frontendのコンテナに入る
+```bash
+make sh_front
+```
+
+コンテナ内でパッケージをインストールする
+```bin/sh
+yarn add パッケージ名
+```
+
 # 運用時に使用すると便利なコマンド
 ## コンテナ起動
 ```
