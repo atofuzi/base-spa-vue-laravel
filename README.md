@@ -51,12 +51,12 @@ make setup
 ```
 ### やっていること  
 docker-compose build --no-cache //コンテナ作成  
-docker-compose up -d // コンテナ起動
+docker-compose up -d // コンテナ起動  
 cp ./backend/.env.example ./backend/.env; // envの作成  
 docker-compose exec project-backend  composer install; // パッケージインストール  
 docker-compose exec project-backend  php artisan key:generate; // laravel アプリケーションキー生成  
 docker-compose exec project-backend  php artisan migrate:fresh; // DB作成  
-docker-compose exec project-backend  php artisan passport:install; // laravel passportを仕様するため、クライアントIDとシークレットキーを生成しoauth_clients_tableにセット  
+docker-compose exec project-backend  php artisan passport:install; // laravel passportを使用するため、クライアントIDとシークレットキーを生成しoauth_clients_tableにセット  
 docker-compose exec project-backend  php artisan db:seed; // データ生成  
 
 ### トラブルシュート
