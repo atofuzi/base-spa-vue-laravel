@@ -55,10 +55,25 @@ docker-compose up -d // コンテナ起動
 cp ./backend/.env.example ./backend/.env; // envの作成  
 docker-compose exec project-backend  composer install; // パッケージインストール  
 docker-compose exec project-backend  php artisan key:generate; // laravel アプリケーションキー生成  
-docker-compose exec project-backend  php artisan migrate; // DB作成  
+docker-compose exec project-backend  php artisan migrate:fresh; // DB作成  
 docker-compose exec project-backend  php artisan passport:install; // laravel passportを仕様するため、クライアントIDとシークレットキーを生成しoauth_clients_tableにセット  
 docker-compose exec project-backend  php artisan db:seed; // データ生成  
 
+### トラブルシュート
+#### docker-compose exec project-backend  php artisan migrate:fresh　でエラーになった場合
+ログ確認にてエラー内容を確認ください  
+```bash
+make log_db
+```
+下記のエラーログが出力されていた場合
+```DBログ
+Cannot create redo log files because data files are corrupt or the database was not shut down cleanly after creating the data files.
+````
+DBのdataの削除をお試しください
+
+```bash
+rm -rf docekr/db/dada
+```
 
 ## フロントエンド起動確認  
 フロントエンドは起動時に、yarn install && yarn serveを実行しているため、コンテナが起動してからサーバが立ち上がるまで数分かかります。  
@@ -87,29 +102,30 @@ http://localhost:8088 にアクセスし、Vueのトップ画面が表示され�
 Web画面  
 http://localhost:8088/phpinfo.php にアクセスしphpの設定画面が表示される  
   
-API  
-Postmanで下記URLにGETリクエストを叩き、「test success」とレスポンスがあればOK。  
-http://localhost:8088/api/test  
+API    
+http://localhost:8088/api/test にアクセスし「test success」と表示されればOK  
   
 もしくは、ターミナルでcurlコマンドを叩いてもOK  
 curl http://localhost:8088/api/test  
   
 ## ログイン機能を試す
+下記のPOSTリクエストをPostman等を使って投げ、tokenが取得できればOK  
+
 method:post  
 api：localhost:8088/oauth/token  
 body: {  
   grant_type: password,  
   client_id: X // oauth_clientテーブル確認  
   client_secret: 'XXXXXXXXXXXX', // oauth_clientテーブル確認  
-  username: 'XXXXXX',  
-  password: 'XXXXXX',  
+  username: 'test0@email.com',  
+  password: 'password',  
   scope: '*'  
 }  
   
-  
-Xはご自身の環境に応じて入力  
-Postman等でリクエストを投げ、tokenが取得できればOK。  
-  
+XXXXXXはoauth_clientテーブルをご確認ください
+※ユーザ情報はUserSeeder.phpで作成しています。適宜変更ください。
+
+
 参考：  
 Laravel Passport「パスワードグラントのトークン」  
 https://readouble.com/laravel/9.x/ja/passport.html  
@@ -159,4 +175,8 @@ make seed
 ## DBのリストア（マイグレーションとシーダーを流し直す）
 ```
 make db_restore
+```
+## DBのログ
+```
+make log_db
 ```
